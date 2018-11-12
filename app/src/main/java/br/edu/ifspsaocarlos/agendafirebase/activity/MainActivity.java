@@ -20,7 +20,9 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -43,6 +45,7 @@ import br.edu.ifspsaocarlos.agendafirebase.model.Contato;
 public class MainActivity extends AppCompatActivity{
 
 
+    private final String LOGCAT_TAG = "LOG_AGENDA";
     private RecyclerView recyclerView;
 
     private TextView empty;
@@ -115,10 +118,13 @@ public class MainActivity extends AppCompatActivity{
 
         databaseReference.addValueEventListener(new ValueEventListener() {
 
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-            progressBar.setVisibility(View.GONE);
-            if (dataSnapshot.getChildrenCount()==0)
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                Log.v(LOGCAT_TAG, "hit dataChange");
+
+                progressBar.setVisibility(View.GONE);
+                if (dataSnapshot.getChildrenCount()==0)
                     empty.setVisibility(View.VISIBLE);
                 else
                     empty.setVisibility(View.GONE);
@@ -182,6 +188,30 @@ public class MainActivity extends AppCompatActivity{
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //Log.v(LOGCAT_TAG, "onOptionsItemSelected");
+        switch (item.getItemId()) {
+            case R.id.todos:
+                //TODO
+                return true;
+            case R.id.amigos:
+                //TODO
+                return true;
+            case R.id.familia:
+                //TODO
+                return true;
+            case R.id.trabalho:
+                //TODO
+                return true;
+            case R.id.outro:
+                //TODO
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -217,25 +247,27 @@ public class MainActivity extends AppCompatActivity{
 
         if (nomeContato==null) {
              query= databaseReference.orderByChild("nome");
-             options = new FirebaseRecyclerOptions.Builder<Contato>().setQuery(query, Contato.class).build();
-
-            adapter = new ContatoAdapter(options);
-            recyclerView.setAdapter(adapter);
-            adapter.startListening();
-
-
-            empty.setText(getResources().getString(R.string.lista_vazia));
-            fab.show();
         }
         else {
-
-
-             //EXERCICIO: insira aqui o código para buscar somente os contatos que atendam
+            //a) Busca pelo nome do contato
+            //EXERCICIO: insira aqui o código para buscar somente os contatos que atendam
             //           ao criterio de busca digitado pelo usuário na SearchView.
 
+            //Neste exercício mudei a query para começar com o nome do contato que foi passado e terminar com um caracter unicode de valor alto
+            //Assim como Pablo mostrou em aula
+            query = databaseReference.orderByChild("nome").startAt(nomeContato).endAt(nomeContato+"\uf8ff");
 
 
         }
+        options = new FirebaseRecyclerOptions.Builder<Contato>().setQuery(query, Contato.class).build();
+
+        adapter = new ContatoAdapter(options);
+        recyclerView.setAdapter(adapter);
+        adapter.startListening();
+
+
+        empty.setText(getResources().getString(R.string.lista_vazia));
+        fab.show();
 
      }
 
