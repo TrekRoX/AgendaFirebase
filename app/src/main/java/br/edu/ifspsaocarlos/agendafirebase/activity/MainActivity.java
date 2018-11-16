@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity{
         if (!searchView.isIconified()) {
 
             searchView.onActionViewCollapsed();
-            updateUI(null);
+            updateUI(null, null);
 
         } else {
             super.onBackPressed();
@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity{
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
 
-            updateUI(query);
+            updateUI(query, null);
             searchView.clearFocus();
 
         }
@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-        updateUI(null);
+        updateUI(null, null);
         setupRecyclerView();
 
 
@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity{
 
                 searchView.setQuery("", false);
 
-                updateUI(null);
+                updateUI(null, null);
 
             }
         });
@@ -190,26 +190,37 @@ public class MainActivity extends AppCompatActivity{
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        //Log.v(LOGCAT_TAG, "onOptionsItemSelected");
         switch (item.getItemId()) {
             case R.id.todos:
-                //TODO
+                limpaTextoBusca();
+                updateUI(null, null);
                 return true;
             case R.id.amigos:
-                //TODO
+                limpaTextoBusca();
+                updateUI(null, "Amigo");
                 return true;
             case R.id.familia:
-                //TODO
+                limpaTextoBusca();
+                updateUI(null, "Família");
                 return true;
             case R.id.trabalho:
-                //TODO
+                limpaTextoBusca();
+                updateUI(null, "Trabalho");
                 return true;
             case R.id.outro:
-                //TODO
+                limpaTextoBusca();
+                updateUI(null, "Outro");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void limpaTextoBusca()
+    {
+        EditText et = (EditText)findViewById(R.id.search_src_text);
+        et.setText("");
+        searchView.onActionViewCollapsed();
     }
 
 
@@ -242,13 +253,16 @@ public class MainActivity extends AppCompatActivity{
 
 
 
-    private void updateUI(String nomeContato)
+    private void updateUI(String nomeContato, String tipoContato)
     {
 
-        if (nomeContato==null) {
-             query= databaseReference.orderByChild("nome");
+        if(nomeContato == null && tipoContato == null)
+        {
+            query= databaseReference.orderByChild("nome");
+
         }
-        else {
+        else if (nomeContato != null)
+        {
             //a) Busca pelo nome do contato
             //EXERCICIO: insira aqui o código para buscar somente os contatos que atendam
             //           ao criterio de busca digitado pelo usuário na SearchView.
@@ -256,9 +270,32 @@ public class MainActivity extends AppCompatActivity{
             //Neste exercício mudei a query para começar com o nome do contato que foi passado e terminar com um caracter unicode de valor alto
             //Assim como Pablo mostrou em aula
             query = databaseReference.orderByChild("nome").startAt(nomeContato).endAt(nomeContato+"\uf8ff");
-
-
         }
+        else
+        {
+            //c) Na MainActivity, acrescente mais um item no menu para permitir filtrar contatos
+            //pelo grupo a qual pertence (Amigo, Família, Trabalho, Outro)
+
+            //Neste exercício fiz a mesma abortagem do item A, quando especificado o tipoConto ele vai filtrar pelo tipo, a difereça é que agora
+            //o método updateUI recebe sempre 2 parâmetros para filtragem, sempre verifica primeiro se foi passado o nome contato, se não verifica o tipo contato e se nenhum deles foi passado
+            //somente ordena por nome.
+            //
+            query = databaseReference.orderByChild("tipoContato").equalTo(tipoContato);
+        }
+
+
+        //if (nomeContato==null) {
+        //    query= databaseReference.orderByChild("nome");
+        //}
+        //else {
+        //    //a) Busca pelo nome do contato
+        //    //EXERCICIO: insira aqui o código para buscar somente os contatos que atendam
+        //    //           ao criterio de busca digitado pelo usuário na SearchView.
+        //    //Neste exercício mudei a query para começar com o nome do contato que foi passado e terminar com um caracter unicode de valor alto
+        //    //Assim como Pablo mostrou em aula
+        //   query = databaseReference.orderByChild("nome").startAt(nomeContato).endAt(nomeContato+"\uf8ff");
+        //}
+
         options = new FirebaseRecyclerOptions.Builder<Contato>().setQuery(query, Contato.class).build();
 
         adapter = new ContatoAdapter(options);
