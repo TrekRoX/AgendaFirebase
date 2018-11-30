@@ -33,7 +33,6 @@
             android:text="@string/nome">
         </TextView>
 
-
         <EditText
             android:id="@+id/editTextNome"
             android:layout_width="match_parent"
